@@ -1,0 +1,30 @@
+
+jwt:
+  secret: 5d05e55f4eb8580c079ecc9b630780c2f04cb720bc353ce0c00b999254671846ac11960f7a3db7d57ed8056eceed391c62c4f50e9a9124bb6c4c8deffa8df6e422f154aeb4ebbb0b6a78596e3acd981d4239ff63b2e0f9d7bc17823d982c6654a0d3063f9c4b6f27e8838a3bda25304a37f9d75fa279d03cbb1bc36e15afff07bc8721299de180c8483837dbcd4dc193398d52591be4211d151134ccc24a64a1855b2dc70a5eac2d30e847d2397445892cb7a8c4e31058745252375101af24ceaef67159dfe6b9537e4f5374f9363b38dca72c40a6f3d3e7a4b92768fcc49e2de185e4c717f0be6d617249b43eb45f397801cacd678f8d187611abbe58a6da69
+  expiration: 300000
+  refreshExpirationMs: 300000
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/users
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+    ddl-auto: update
+    show-sql: true
+
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+server:
+  port: 8082
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/eureka/
+
+
