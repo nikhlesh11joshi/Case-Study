@@ -57,7 +57,7 @@ public class PaymentService {
     private static final String CANCELLED= "CANCELLED";
     private static final String CHARGEBACK= "CHARGEBACK";
 
-    public ResponseEntity<PaymentResponseDto> createPayment(PaymentRequestDto paymentRequestDto) {
+    public ResponseEntity<PaymentResponseDto> createPayment(PaymentRequestDto paymentRequestDto,String bearerToken) {
        // boolean isCardValidate =false;
         logger.info("Creating payment for order id: {}", paymentRequestDto.getOrderId());
         Payment payment = new Payment();
@@ -72,7 +72,7 @@ public class PaymentService {
         CardDetailsRequest cardDetailsRequest = paymentRequestDto.getCardDetailsRequest();
         logger.info("Validating card details for order id: {}", paymentRequestDto.getOrderId());
         logger.info("payment details: {}", payment);
-        if(isValidateCard(cardDetailsRequest)){
+        if(isValidateCard(cardDetailsRequest,bearerToken)){
             logger.info("Card validation is success .. Now sending this request to payment gateway for payment completion");
             paymentRepository.save(payment);
             ResponseEntity<PaymentResponseDto> paymentResponseDto = processPayment(payment);
@@ -90,7 +90,7 @@ public class PaymentService {
                     paymentConfirmationStatusRequestDto.setPaymentStatus("SUCCESS");
                     paymentConfirmationStatusRequestDto.setOrderId(paymentRequestDto.getOrderId());
                     paymentConfirmationStatusRequestDto.setUserId(paymentRequestDto.getUserId());
-                    sendOrderConfirmationNotification(paymentConfirmationStatusRequestDto);
+                    sendOrderConfirmationNotification(paymentConfirmationStatusRequestDto,bearerToken);
 
                 }
 
@@ -108,7 +108,7 @@ public class PaymentService {
                     paymentConfirmationStatusRequestDto.setPaymentStatus("FAILED");
                     paymentConfirmationStatusRequestDto.setOrderId(paymentRequestDto.getOrderId());
                     paymentConfirmationStatusRequestDto.setUserId(paymentRequestDto.getUserId());
-                    sendOrderConfirmationNotification(paymentConfirmationStatusRequestDto);
+                    sendOrderConfirmationNotification(paymentConfirmationStatusRequestDto,bearerToken);
 
                 }
                 return ResponseEntity.ok(paymentResponseDto.getBody());
@@ -127,7 +127,7 @@ public class PaymentService {
                     paymentConfirmationStatusRequestDto.setPaymentStatus("CANCELLED");
                     paymentConfirmationStatusRequestDto.setOrderId(paymentRequestDto.getOrderId());
                     paymentConfirmationStatusRequestDto.setUserId(paymentRequestDto.getUserId());
-                    sendOrderConfirmationNotification(paymentConfirmationStatusRequestDto);
+                    sendOrderConfirmationNotification(paymentConfirmationStatusRequestDto,bearerToken);
 
                 }
                 return ResponseEntity.ok(paymentResponseDto.getBody());
@@ -146,7 +146,7 @@ public class PaymentService {
                     paymentConfirmationStatusRequestDto.setPaymentStatus(TIMEOUT);
                     paymentConfirmationStatusRequestDto.setOrderId(paymentRequestDto.getOrderId());
                     paymentConfirmationStatusRequestDto.setUserId(paymentRequestDto.getUserId());
-                    sendOrderConfirmationNotification(paymentConfirmationStatusRequestDto);
+                    sendOrderConfirmationNotification(paymentConfirmationStatusRequestDto,bearerToken);
 
                 }
                 return ResponseEntity.ok(paymentResponseDto.getBody());
@@ -164,7 +164,7 @@ public class PaymentService {
                     paymentConfirmationStatusRequestDto.setPaymentStatus(FAILED);
                     paymentConfirmationStatusRequestDto.setOrderId(paymentRequestDto.getOrderId());
                     paymentConfirmationStatusRequestDto.setUserId(paymentRequestDto.getUserId());
-                    sendOrderConfirmationNotification(paymentConfirmationStatusRequestDto);
+                    sendOrderConfirmationNotification(paymentConfirmationStatusRequestDto,bearerToken);
 
                 }
                 return ResponseEntity.ok(paymentResponseDto.getBody());
@@ -182,12 +182,12 @@ public class PaymentService {
        // return ResponseEntity.ok(paymentResponseDto);
     }
 
-private ResponseEntity<PaymentConfirmationStatusResponseDto> sendOrderConfirmationNotification(PaymentConfirmationStatusRequestDto paymentConfirmationStatusRequestDto){
+private ResponseEntity<PaymentConfirmationStatusResponseDto> sendOrderConfirmationNotification(PaymentConfirmationStatusRequestDto paymentConfirmationStatusRequestDto,String bearerToken){
     ResponseEntity<PaymentConfirmationStatusResponseDto> paymentConfirmationStatusResponseDto =null;
     if(paymentConfirmationStatusRequestDto!=null){
         logger.info("Sending order confirmation notification to Order service for order id: {}", paymentConfirmationStatusRequestDto.getOrderId());
         try {
-            paymentConfirmationStatusResponseDto = orderServiceClient.sendPaymentConfirmationNotificationToOrderService(paymentConfirmationStatusRequestDto);
+            paymentConfirmationStatusResponseDto = orderServiceClient.sendPaymentConfirmationNotificationToOrderService(paymentConfirmationStatusRequestDto,bearerToken);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
@@ -218,13 +218,13 @@ private ResponseEntity<PaymentConfirmationStatusResponseDto> sendOrderConfirmati
     return null;
 
 }
-    private boolean isValidateCard(CardDetailsRequest cardDetailsRequest) {
+    private boolean isValidateCard(CardDetailsRequest cardDetailsRequest, String bearerToken) {
         ResponseEntity<CardValidationResponse> cardValidationResponse =null;
         if(cardDetailsRequest!=null) {
             logger.info("Validating card for card number: {}", cardDetailsRequest.getCardNumber());
             try {
                 logger.info("Sending card validation request to Validation service : {}", cardDetailsRequest.getCardNumber());
-                cardValidationResponse = cardValidationService.validateCard(cardDetailsRequest);
+                cardValidationResponse = cardValidationService.validateCard(cardDetailsRequest,bearerToken);
             } catch (RuntimeException e) {
                 throw new RuntimeException(e);
             }
@@ -285,7 +285,7 @@ private ResponseEntity<PaymentConfirmationStatusResponseDto> sendOrderConfirmati
     }
 
 
-    public ResponseEntity<PaymentResponseDto> updatePaymentByPaymentId(Long paymentId, PaymentRequestDto paymentRequestDto) {
+    public ResponseEntity<PaymentResponseDto> updatePaymentByPaymentId(Long paymentId, PaymentRequestDto paymentRequestDto,String bearerToken) {
         ResponseEntity<PaymentResponseDto> paymentResponseEntity =null;
         logger.info("Updating order details for payment id: {}", paymentId);
         if (paymentId != null && paymentRequestDto.getOrderId() != null) {
@@ -295,7 +295,7 @@ private ResponseEntity<PaymentConfirmationStatusResponseDto> sendOrderConfirmati
                     if (payment.getUpdatedAt().isBefore(LocalDateTime.now().minusMinutes(30))) {
                         CardDetailsRequest cardDetailsRequest = paymentRequestDto.getCardDetailsRequest();
                         logger.info("Validating card details for order id: {}", paymentRequestDto.getOrderId());
-                        if (isValidateCard(cardDetailsRequest)) {
+                        if (isValidateCard(cardDetailsRequest,bearerToken)) {
                             logger.info("Card validation is success .. Now sending this request to payment gateway for payment completion");
                                 try{
                                      paymentResponseEntity = processPayment(payment);

@@ -41,17 +41,20 @@ spring:
             predicates:
               - Path=/auth/**
 
-          - id: user-service-swagger
-            uri: lb://USER-SERVICE
+          - id: payment-service
+            uri: lb://PAYMENT-SERVICE
             predicates:
-              - Path=/users/swagger-ui/**
+                  - Path=/payment/**
             filters:
-              - RewritePath=/users/swagger-ui/(?<segment>.*), /swagger-ui/$\{segment}
+                  - AuthenticationFilter
 
-          - id: authentication-service-swagger
-            uri: lb://AUTHENTICATION-SERVICE
+          - id: card-validation-service
+            uri: lb://CARD-VALIDATION-SERVICE
             predicates:
-              - Path=/auth/swagger-ui/**
+                    - Path=/cards/**
+            filters:
+                      - AuthenticationFilter
+
 
 management:
   tracing:

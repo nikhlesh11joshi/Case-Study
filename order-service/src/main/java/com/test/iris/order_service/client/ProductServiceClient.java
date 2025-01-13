@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "product-service", url = "http://localhost:8084/products")
+@FeignClient(name = "product-service", url = "http://localhost:8081/products")
 public interface ProductServiceClient {
     @GetMapping("/check-availability/productId/{productId}/quantity/{quantity}")
     ProductAvailabilityResponse checkProductAvailability(@PathVariable("productId") Long productId,
@@ -18,11 +18,11 @@ public interface ProductServiceClient {
                                                          @RequestHeader("Authorization") String authorizationHeader);
 
     @PostMapping("/check-availability")
-    ProductAvailabilityListResponse checkProductAvailabilityList(@RequestBody List<Product> cartItems
-                                                             /*@RequestHeader("Authorization") String authorizationHeader*/);
+    ProductAvailabilityListResponse checkProductAvailabilityList(@RequestBody List<Product> cartItems,
+                                                             @RequestHeader("Authorization") String authorizationHeader);
 
     @PutMapping("/update-product/status")
-    void updateOrderStatus(@RequestBody List<Product> cartItems);
+    void updateOrderStatus(@RequestBody List<Product> cartItems,@RequestHeader("Authorization") String authorizationHeader);
 
 
 

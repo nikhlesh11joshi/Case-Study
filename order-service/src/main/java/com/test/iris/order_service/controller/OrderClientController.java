@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,26 +34,27 @@ public class OrderClientController {
             @ApiResponse(responseCode = "404", description = "Order status not updated")
     })
     @PutMapping("/update-order/status")
-    public ResponseEntity<PaymentConfirmationStatusResponseDto> sendOrderConfirmationNotification(@Valid @RequestBody PaymentConfirmationStatusRequestDto paymentConfirmationStatusRequestDto) {
+    public ResponseEntity<PaymentConfirmationStatusResponseDto> sendOrderConfirmationNotification(@Valid @RequestBody PaymentConfirmationStatusRequestDto paymentConfirmationStatusRequestDto, HttpServletRequest request) {
         logger.info("Order status update request received for order id: " + paymentConfirmationStatusRequestDto);
+            String bearerToken = request.getHeader("Authorization");
         Long orderId = paymentConfirmationStatusRequestDto.getOrderId();
         Long userId = paymentConfirmationStatusRequestDto.getUserId();
         String paymentStatus = paymentConfirmationStatusRequestDto.getPaymentStatus();
         PaymentConfirmationStatusResponseDto paymentConfirmationStatusResponseDto = new PaymentConfirmationStatusResponseDto();
         if(paymentStatus.equals("SUCCESS")) {
             logger.info("Payment status is success for order id: {}", orderId);
-            orderService.updateOrderStatus(orderId, userId, paymentStatus,"SUCCESS");
+            orderService.updateOrderStatus(orderId, userId, paymentStatus,"SUCCESS",bearerToken);
             paymentConfirmationStatusResponseDto.setStatus("SUCCESS");
             paymentConfirmationStatusResponseDto.setMessage("Order status updated successfully");
         } else if (paymentStatus.equals("FAILURE")) {
             logger.info("Payment status is failure for order id: {}", orderId);
-            orderService.updateOrderStatus(orderId, userId, paymentStatus,"FAILURE");
+            orderService.updateOrderStatus(orderId, userId, paymentStatus,"FAILURE",bearerToken);
             paymentConfirmationStatusResponseDto.setStatus("FAILURE");
             paymentConfirmationStatusResponseDto.setMessage("Order status FAILED");
         }
         else if (paymentStatus.equals("TIMEOUT")) {
             logger.info("Payment status is pending for order id: {}", orderId);
-            orderService.updateOrderStatus(orderId, userId, paymentStatus,"TIMEOUT");
+            orderService.updateOrderStatus(orderId, userId, paymentStatus,"TIMEOUT",bearerToken);
             paymentConfirmationStatusResponseDto.setStatus("TIMEOUT");
             paymentConfirmationStatusResponseDto.setMessage("Order status TIMEOUT");
         }

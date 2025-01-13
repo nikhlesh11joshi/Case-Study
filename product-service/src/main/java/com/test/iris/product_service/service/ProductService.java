@@ -116,11 +116,32 @@ public class ProductService {
             throw new ProductNotFoundException("Product not found");
         }
         else {
-            productFound.setQuantity(productFound.getQuantity()+updateProductDto.getQuantity());
+            if(updateProductDto.getQuantity()!=null){
+                productFound.setQuantity(productFound.getQuantity()+updateProductDto.getQuantity());
+                logger.info("Product quantity updated successfully");
+            }
+            if (updateProductDto.getPrice()!=null){
+                productFound.setPrice(updateProductDto.getPrice());
+                logger.info("Product price updated successfully");
+            }
+            if (updateProductDto.getCategory()!=null){
+                productFound.setCategory(updateProductDto.getCategory());
+                logger.info("Product category updated successfully");
+            }
+            if (updateProductDto.getName()!=null){
+                productFound.setName(updateProductDto.getName());
+                logger.info("Product name updated successfully");
+            }
+            if (updateProductDto.getDescription()!=null){
+                productFound.setDescription(updateProductDto.getDescription());
+                logger.info("Product description updated successfully");
+            }
+
+/*
             productFound.setPrice(updateProductDto.getPrice());
             productFound.setCategory(updateProductDto.getCategory());
             productFound.setName(updateProductDto.getName());
-            productFound.setDescription(updateProductDto.getDescription());
+            productFound.setDescription(updateProductDto.getDescription());*/
             productRepository.save(productFound);
         }
         ProductResponse productResponse = modelMapper.map(productFound, ProductResponse.class);
@@ -245,7 +266,7 @@ public class ProductService {
 
     }
 
-    public ResponseEntity<NotificationResponse> updateProductStatus(List<ProductDto> cartItems) {
+    public ResponseEntity<NotificationResponse> updateProductStatus(List<ProductDto> cartItems,String bearerToken) {
 
         logger.info("update product status request recieved : "+ cartItems);
         for (ProductDto productDto : cartItems) {

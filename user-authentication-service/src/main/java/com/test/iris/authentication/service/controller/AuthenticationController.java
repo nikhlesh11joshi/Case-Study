@@ -11,6 +11,8 @@ import com.test.iris.authentication.service.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +40,7 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "400", description = "Invalid input")
     })
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> addNewUser(@RequestBody UserRequest userRequest /*UserCredentials userCredentials*/){
+    public ResponseEntity<UserResponse> addNewUser(@RequestBody @Valid UserRequest userRequest){
         logger.info("UserRequest request recieved  {} : ",userRequest);
         UserResponse userResponse= authenticationService.saveUser(userRequest);
         logger.info("User saved successfully {} : ",userResponse);
@@ -50,7 +52,7 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "401", description = "Invalid username or password")
     })
     @PostMapping("/token")
-    public ResponseEntity<TokenResponse> getToken(@RequestBody AuthRequest authRequest){
+    public ResponseEntity<TokenResponse> getToken(@RequestBody @Valid  AuthRequest authRequest){
         logger.info("AuthRequest request recieved  {} : ",authRequest);
        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(),authRequest.getPassword()));
         if(authentication.isAuthenticated()){
@@ -68,7 +70,7 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "401", description = "Invalid token")
     })
     @GetMapping("/validate")
-    public ResponseEntity<ValidateTokenResponse> validateToken(@RequestParam("token") String token){
+    public ResponseEntity<ValidateTokenResponse> validateToken(@RequestParam("token") @NotNull String token){
         logger.info("Token validation recieved  {} : ");
         return  authenticationService.validateToken(token);
 

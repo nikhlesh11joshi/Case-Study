@@ -38,9 +38,13 @@ public class CardValidationController {
             @ApiResponse(responseCode = "404", description = "Card not validated")
     })
     @PostMapping("/validate-card")
-    public ResponseEntity<CardValidationResponse> validateCard(@Valid @RequestBody CardDetailsRequest cardDetailsRequst) {
+    public ResponseEntity<CardValidationResponse> validateCard(@Valid @RequestBody CardDetailsRequest cardDetailsRequst,@RequestHeader("Authorization") String authorizationHeader) {
+        if(authorizationHeader == null || authorizationHeader.isEmpty()){
+            logger.error("Authorization header is missing");
+            return ResponseEntity.status(401).build();
+        }
         logger.info("Validating card for card number: {}", CardValidationUtil.maskCardNumber(cardDetailsRequst.getCardNumber()));
-        CardValidationResponse cardValidationResponse = cardValidationService.validateCard(cardDetailsRequst);
+        CardValidationResponse cardValidationResponse = cardValidationService.validateCard(cardDetailsRequst,authorizationHeader);
         logger.info("Card validation response: {}", cardValidationResponse);
         return ResponseEntity.ok(cardValidationResponse);
     }
@@ -51,9 +55,13 @@ public class CardValidationController {
             @ApiResponse(responseCode = "404", description = "Card not created")
     })
     @PostMapping("/create-card")
-    public ResponseEntity<CardDetailsResponse> saveCardofUser(@Valid @RequestBody CardDetailsRequest cardDetailsRequst) {
+    public ResponseEntity<CardDetailsResponse> saveCardofUser(@Valid @RequestBody CardDetailsRequest cardDetailsRequst,@RequestHeader("Authorization") String authorizationHeader) {
+        if(authorizationHeader == null || authorizationHeader.isEmpty()){
+            logger.error("Authorization header is missing");
+            return ResponseEntity.status(401).build();
+        }
         logger.info("Validating card for card number: {}", CardValidationUtil.maskCardNumber(cardDetailsRequst.getCardNumber()));
-        Cards cards =   cardValidationService.saveCard(cardDetailsRequst);
+        Cards cards =   cardValidationService.saveCard(cardDetailsRequst,authorizationHeader);
         CardDetailsResponse cardDetailsResponse = modelMapper.map(cards, CardDetailsResponse.class);
          logger.info("Card validation response: {}", cardDetailsResponse);
         return ResponseEntity.ok(cardDetailsResponse);

@@ -45,7 +45,7 @@ public class AuthenticationService {
     @Value("${jwt.expiration}")
     private int JwtExpirationMs;
 
-    @Transactional
+
     public UserResponse saveUser(UserRequest userRequest) {
         /*userCredentials.setPassword(passwordEncoder.encode(userCredentials.getPassword()));
         userCredentialRepository.save(userCredentials);

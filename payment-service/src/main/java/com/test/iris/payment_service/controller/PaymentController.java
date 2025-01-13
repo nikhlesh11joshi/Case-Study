@@ -1,12 +1,14 @@
 package com.test.iris.payment_service.controller;
 
 import com.test.iris.payment_service.request.PaymentRequestDto;
+import com.test.iris.payment_service.response.ErrorResponseMessage;
 import com.test.iris.payment_service.response.PaymentResponseDto;
 import com.test.iris.payment_service.service.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -31,9 +33,13 @@ public class PaymentController {
             @ApiResponse(responseCode = "404", description = "Payment not created")
     })
     @PostMapping("/createPayment")
-    public ResponseEntity<PaymentResponseDto> createPayment(@RequestBody PaymentRequestDto paymentRequestDto) {
+    public ResponseEntity<Object> createPayment(@RequestBody PaymentRequestDto paymentRequestDto,HttpServletRequest request) {
         logger.info("Payment request received: " + paymentRequestDto);
-        ResponseEntity<PaymentResponseDto> paymentResponse=   paymentService.createPayment(paymentRequestDto);
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken == null) {
+            return ResponseEntity.badRequest().body(new ErrorResponseMessage("Bad Request","Authorization token is missing"));
+        }
+        ResponseEntity<PaymentResponseDto> paymentResponse=   paymentService.createPayment(paymentRequestDto,bearerToken);
         return ResponseEntity.ok(paymentResponse.getBody());
     }
 
@@ -55,9 +61,10 @@ public class PaymentController {
             @ApiResponse(responseCode = "404", description = "Payment not found")
     })
     @PutMapping("/updatePayment/{paymentId}")
-    public ResponseEntity<PaymentResponseDto> updatePayment(@NotNull @PathVariable Long paymentId,@Valid  @RequestBody PaymentRequestDto paymentRequestDto) {
+    public ResponseEntity<PaymentResponseDto> updatePayment(@NotNull @PathVariable Long paymentId,@Valid  @RequestBody PaymentRequestDto paymentRequestDto,HttpServletRequest request) {
         logger.info("Update payment by paymentId: " + paymentId + " with request: " + paymentRequestDto);
-        return paymentService.updatePaymentByPaymentId(paymentId, paymentRequestDto);
+        String token = request.getHeader("Authorization");
+        return paymentService.updatePaymentByPaymentId(paymentId, paymentRequestDto,token);
     }
 /*
     @DeleteMapping("/deletePayment/{paymentId}")

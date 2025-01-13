@@ -13,6 +13,7 @@ import com.test.iris.order_service.request.OrderProductDto;
 import com.test.iris.order_service.request.OrderRequestDto;
 import com.test.iris.order_service.response.*;
 import com.test.iris.order_service.util.OrderConstant;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.modelmapper.ModelMapper;
@@ -72,7 +73,7 @@ public class OrderService {
             newOrder.setNote(orderRequestDto.getNote());
             newOrder.setStatus(OrderConstant.ORDER_STATUS_PENDING);
           //  newOrder.setOrderProductList(modelMapper.map(cartItems, List.class));
-            boolean isProductsAvailable = checkProductAvailabilityList(cartItems);
+            boolean isProductsAvailable = checkProductAvailabilityList(cartItems,bearerToken);
             if (isProductsAvailable){
                 Double totalAmount = cartItems.stream().mapToDouble(product -> product.getPrice() * product.getQuantity()).sum();
                 logger.info("Total amount for the order: "+ totalAmount);
@@ -282,10 +283,10 @@ public class OrderService {
         logger.info("ProductAvailabilityResponse : "+productAvailabilityResponse);
         return productAvailabilityResponse.isAvailable();
     }
-    private  boolean checkProductAvailabilityList(List<Product> cartItems) {
+    private  boolean checkProductAvailabilityList(List<Product> cartItems,String bearerToken) {
         logger.info("checkProductAvailabilityList : "+cartItems);
         try{
-            ProductAvailabilityListResponse productAvailabilityResponse = productServiceClient.checkProductAvailabilityList(cartItems);
+            ProductAvailabilityListResponse productAvailabilityResponse = productServiceClient.checkProductAvailabilityList(cartItems,bearerToken);
            if(productAvailabilityResponse.isAvailable() == false)  {
                 logger.info("ProductAvailabilityResponse is "+ productAvailabilityResponse.isAvailable());
                 throw new ProductNotFoundException("Product is not available for the order or required quantity os not available !! Try with less quantity");
@@ -357,14 +358,14 @@ public class OrderService {
         }
 
     }
-    public void updateOrderStatus(Long orderId, Long userId, String paymentStatus, String status) {
+    public void updateOrderStatus(Long orderId, Long userId, String paymentStatus, String status,String bearerToken) {
         logger.info("Update order status by orderId Request recieved : "+ orderId);
         if(orderId!=null && userId!=null && paymentStatus!=null && status!=null){
                 if(paymentStatus.equals("SUCCESS")){
                     orderRepository.updateOrderStatus(orderId, userId, paymentStatus, status);
                     logger.info("Order status updated successfully for order id: "+ orderId);
                     try{
-                        productServiceClient.updateOrderStatus(orderProductMap.get(orderId));
+                        productServiceClient.updateOrderStatus(orderProductMap.get(orderId),bearerToken);
                         logger.info("Product status updated successfully for order id: "+ orderId);
                     }
                     catch (Exception e){

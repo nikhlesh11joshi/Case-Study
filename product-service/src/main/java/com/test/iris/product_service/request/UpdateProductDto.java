@@ -1,24 +1,25 @@
 package com.test.iris.product_service.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class UpdateProductDto {
     @Schema(description = "Product Name", example = "Laptop")
-    @NotNull
+    @JsonProperty(required = false)
     private String name;
-    @NotNull
+    @JsonProperty(required = false)
     @Size(max = 100)
     @Schema(description = "Product Description", example = "Laptop with 8GB RAM")
     private String description;
-    @NotNull
+    @JsonProperty(required = false)
     @Schema(description = "Product Price", example = "50000")
     private Double price;
-    @NotNull
+    @JsonProperty(required = false)
     @Schema(description = "Product Category", example = "Electronics")
     private String category;
-    @NotNull
+    @JsonProperty(required = false)
     @Schema(description = "Product Quantity", example = "10")
     private Long quantity;
 

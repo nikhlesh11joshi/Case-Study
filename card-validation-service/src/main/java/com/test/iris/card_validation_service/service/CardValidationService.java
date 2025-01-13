@@ -34,7 +34,7 @@ public class CardValidationService {
     @Autowired
     private CardRepository cardRepository;
 
-    public CardValidationResponse validateCard(CardDetailsRequest cardDetailsRequst) {
+    public CardValidationResponse validateCard(CardDetailsRequest cardDetailsRequst,String bearerToken) {
         logger.info("Validating card for card number: {}", CardValidationUtil.maskCardNumber(cardDetailsRequst.getCardNumber()));
 
         boolean isCardValid=false;
@@ -86,11 +86,11 @@ public class CardValidationService {
 
     }
 
-    public Cards saveCard(CardDetailsRequest cardDetailsRequst) {
+    public Cards saveCard(CardDetailsRequest cardDetailsRequst,String authorizationHeader) {
         boolean isCardExistForuserId=false;
         logger.info("Save the card details for userId: {}", cardDetailsRequst.getUserId());
         Long userId = cardDetailsRequst.getUserId();
-        CardValidationResponse cardValidationResponse = validateCard(cardDetailsRequst);
+        CardValidationResponse cardValidationResponse = validateCard(cardDetailsRequst,authorizationHeader);
             if(cardValidationResponse.isValid()) {
                 if (userId != null) {
                     isCardExistForuserId = cardRepository.existsByUserId(userId);

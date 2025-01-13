@@ -141,7 +141,11 @@ public class ProductController {
         // Logic to check product availability
        return  productService.checkProductAvailabilityandQty(productId,quantity);
     }
-
+    @Operation(summary = "Check product availability", description ="This is an internal API Call from Order Service to check product availability")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product available"),
+            @ApiResponse(responseCode = "404", description = "Product not available")
+    })
     @PostMapping("/check-availability")
     public ResponseEntity<ProductAvailabilityListResponse> checkProductAvailabilityList(@Valid @RequestBody List<ProductDto> cartItems) {
         logger.info("checkProductAvailability - Request recieved :  cartItems : "+cartItems);
